@@ -1208,7 +1208,7 @@ func postIsuCondition(c echo.Context) error {
 
 	queryBaseStr := "INSERT INTO `isu_condition` (`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES "
 	isFirstCompose := true
-	for _, cond := range chunkedReq {
+	for _, cond := range req {
 		timestamp := time.Unix(cond.Timestamp, 0)
 
 		if !isValidConditionFormat(cond.Condition) {
