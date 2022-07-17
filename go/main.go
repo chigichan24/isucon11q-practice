@@ -1199,16 +1199,16 @@ func postIsuCondition(c echo.Context) error {
 
 		var tailComma = ""
 		if isFirstCompose {
-			tailComma = ","
+			tailComma = ""
 			isFirstCompose = false
 		} else {
-			tailComma = ""
+			tailComma = ","
 		}
 
 		if cond.IsSitting {
-			queryBaseStr += fmt.Sprintf("(%s, %s, 1, %s, %s)", jiaIsuUUID, timestamp.Format("2021-06-04 18:59:09"), cond.Condition, cond.Message) + tailComma
+			queryBaseStr += tailComma + fmt.Sprintf("(%s, %s, 1, %s, %s)", jiaIsuUUID, timestamp.Format("YYYY-MM-DD hh:mm:ss"), cond.Condition, cond.Message)
 		} else {
-			queryBaseStr += fmt.Sprintf("(%s, %s, 0, %s, %s)", jiaIsuUUID, timestamp.Format("2021-06-04 18:59:09"), cond.Condition, cond.Message) + tailComma
+			queryBaseStr += tailComma + fmt.Sprintf("(%s, %s, 0, %s, %s)", jiaIsuUUID, timestamp.Format("YYYY-MM-DD hh:mm:ss"), cond.Condition, cond.Message)
 		}
 	}
 
