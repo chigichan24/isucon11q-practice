@@ -1176,11 +1176,11 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
 
-	if time.Now().Sub(lastProcessedPostTime).Seconds() < 0.7 {
+	/*if time.Now().Sub(lastProcessedPostTime).Seconds() < 0.7 {
 		chunkedReq = append(chunkedReq, req...)
 		return c.NoContent(http.StatusAccepted)
 	}
-	lastProcessedPostTime = time.Now()
+	lastProcessedPostTime = time.Now()*/
 
 	tx, err := db.Beginx()
 	if err != nil {
@@ -1201,7 +1201,7 @@ func postIsuCondition(c echo.Context) error {
 
 	queryBaseStr := "INSERT INTO `isu_condition` (`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES "
 	isFirstCompose := true
-	for _, cond := range chunkedReq {
+	for _, cond := range req {
 		timestamp := time.Unix(cond.Timestamp, 0)
 
 		if !isValidConditionFormat(cond.Condition) {
@@ -1241,36 +1241,27 @@ func postIsuCondition(c echo.Context) error {
 
 // ISUのコンディションの文字列がcsv形式になっているか検証
 func isValidConditionFormat(conditionStr string) bool {
-
-	keys := []string{"is_dirty=", "is_overweight=", "is_broken="}
-	const valueTrue = "true"
-	const valueFalse = "false"
-
-	idxCondStr := 0
-
-	for idxKeys, key := range keys {
-		if !strings.HasPrefix(conditionStr[idxCondStr:], key) {
-			return false
-		}
-		idxCondStr += len(key)
-
-		if strings.HasPrefix(conditionStr[idxCondStr:], valueTrue) {
-			idxCondStr += len(valueTrue)
-		} else if strings.HasPrefix(conditionStr[idxCondStr:], valueFalse) {
-			idxCondStr += len(valueFalse)
-		} else {
-			return false
-		}
-
-		if idxKeys < (len(keys) - 1) {
-			if conditionStr[idxCondStr] != ',' {
-				return false
-			}
-			idxCondStr++
-		}
+	if len(conditionStr) < 47 || len(conditionStr) > 50 {
+		return false
+	} else if conditionStr == "is_dirty=false,is_overweight=false,is_broken=false" {
+		return true
+	} else if conditionStr == "is_dirty=false,is_overweight=false,is_broken=true" {
+		return true
+	} else if conditionStr == "is_dirty=false,is_overweight=true,is_broken=false" {
+		return true
+	} else if conditionStr == "is_dirty=false,is_overweight=true,is_broken=true" {
+		return true
+	} else if conditionStr == "is_dirty=true,is_overweight=false,is_broken=false" {
+		return true
+	} else if conditionStr == "is_dirty=true,is_overweight=false,is_broken=true" {
+		return true
+	} else if conditionStr == "is_dirty=true,is_overweight=true,is_broken=false" {
+		return true
+	} else if conditionStr == "is_dirty=true,is_overweight=true,is_broken=true" {
+		return true
+	} else {
+		return false
 	}
-
-	return (idxCondStr == len(conditionStr))
 }
 
 func getIndex(c echo.Context) error {
