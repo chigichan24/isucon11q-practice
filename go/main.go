@@ -1176,7 +1176,7 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
 
-	if lastProcessedPostTime.Sub(time.Now()).Seconds() < 0.7 {
+	if time.Now().Sub(lastProcessedPostTime).Seconds() < 0.7 {
 		chunkedReq = append(chunkedReq, req...)
 		return c.NoContent(http.StatusAccepted)
 	}
