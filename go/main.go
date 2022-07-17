@@ -1221,9 +1221,6 @@ func postIsuCondition(c echo.Context) error {
 			queryBaseStr += tailComma + fmt.Sprintf("(\"%s\", \"%s\", 0, \"%s\", \"%s\")", jiaIsuUUID, timestamp.Format("2006-01-02 15:04:05"), cond.Condition, cond.Message)
 		}
 	}
-
-	c.Logger().Debug(queryBaseStr)
-
 	_, err = tx.Exec(queryBaseStr)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
