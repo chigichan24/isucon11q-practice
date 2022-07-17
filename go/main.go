@@ -206,6 +206,7 @@ func init() {
 }
 
 var lastProcessedPostTime time.Time
+var chunkedReq []PostIsuConditionRequest
 
 func main() {
 	e := echo.New()
@@ -1175,11 +1176,11 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
 
-	/*if time.Now().Sub(lastProcessedPostTime).Seconds() < 0.7 {
+	if time.Now().Sub(lastProcessedPostTime).Seconds() < 0.7 {
 		chunkedReq = append(chunkedReq, req...)
 		return c.NoContent(http.StatusAccepted)
 	}
-	lastProcessedPostTime = time.Now()*/
+	lastProcessedPostTime = time.Now()
 
 	tx, err := db.Beginx()
 	if err != nil {
@@ -1200,7 +1201,7 @@ func postIsuCondition(c echo.Context) error {
 
 	queryBaseStr := "INSERT INTO `isu_condition` (`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES "
 	isFirstCompose := true
-	for _, cond := range req {
+	for _, cond := range chunkedReq {
 		timestamp := time.Unix(cond.Timestamp, 0)
 
 		if !isValidConditionFormat(cond.Condition) {
@@ -1231,6 +1232,7 @@ func postIsuCondition(c echo.Context) error {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	chunkedReq = nil
 
 	return c.NoContent(http.StatusAccepted)
 }
