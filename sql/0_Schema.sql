@@ -26,9 +26,6 @@ CREATE TABLE `isu_condition` (
   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
-CREATE INDEX idx_jia_isu_uuid ON `isu_condition` (jia_isu_uuid);
-ALTER TABLE `isu_condition` ADD INDEX idx_jia_isu_uuid_alter_table (jia_isu_uuid);
-
 CREATE TABLE `user` (
   `jia_user_id` VARCHAR(255) PRIMARY KEY,
   `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)
@@ -38,3 +35,5 @@ CREATE TABLE `isu_association_config` (
   `name` VARCHAR(255) PRIMARY KEY,
   `url` VARCHAR(255) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
+
+ALTER TABLE `isu_condition` ADD INDEX idx_jia_isu_uuid_alter_table(`jia_isu_uuid`);
