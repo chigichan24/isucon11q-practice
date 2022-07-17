@@ -1212,6 +1212,8 @@ func postIsuCondition(c echo.Context) error {
 		}
 	}
 
+	c.Logger().Debug(queryBaseStr)
+
 	_, err = tx.Exec(queryBaseStr)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
