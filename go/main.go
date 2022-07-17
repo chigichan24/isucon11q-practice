@@ -205,6 +205,8 @@ func init() {
 	}
 }
 
+var lastProcessedPostTime time.Time
+
 func main() {
 	e := echo.New()
 	e.Debug = true
@@ -236,6 +238,8 @@ func main() {
 	e.Static("/assets", frontendContentsPath+"/assets")
 
 	mySQLConnectionData = NewMySQLConnectionEnv()
+
+	lastProcessedPostTime = time.Now()
 
 	var err error
 	db, err = mySQLConnectionData.ConnectDB()
@@ -1164,12 +1168,19 @@ func postIsuCondition(c echo.Context) error {
 	}
 
 	req := []PostIsuConditionRequest{}
+	chunkedReq := []PostIsuConditionRequest{}
 	err := c.Bind(&req)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "bad request body")
 	} else if len(req) == 0 {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
+
+	if lastProcessedPostTime.Sub(time.Now()).Seconds() < 0.7 {
+		chunkedReq = append(chunkedReq, req...)
+		return c.NoContent(http.StatusAccepted)
+	}
+	lastProcessedPostTime = time.Now()
 
 	tx, err := db.Beginx()
 	if err != nil {
@@ -1190,7 +1201,7 @@ func postIsuCondition(c echo.Context) error {
 
 	queryBaseStr := "INSERT INTO `isu_condition` (`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES "
 	isFirstCompose := true
-	for _, cond := range req {
+	for _, cond := range chunkedReq {
 		timestamp := time.Unix(cond.Timestamp, 0)
 
 		if !isValidConditionFormat(cond.Condition) {
