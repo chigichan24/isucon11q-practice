@@ -1168,7 +1168,6 @@ func postIsuCondition(c echo.Context) error {
 	}
 
 	req := []PostIsuConditionRequest{}
-	chunkedReq := []PostIsuConditionRequest{}
 	err := c.Bind(&req)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "bad request body")
