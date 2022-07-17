@@ -1206,9 +1206,9 @@ func postIsuCondition(c echo.Context) error {
 		}
 
 		if cond.IsSitting {
-			queryBaseStr += tailComma + fmt.Sprintf("(%s, %s, 1, %s, %s)", jiaIsuUUID, timestamp.Format("2006-01-02 15:04:05"), cond.Condition, cond.Message)
+			queryBaseStr += tailComma + fmt.Sprintf("(\"%s\", \"%s\", 1, \"%s\", \"%s\")", jiaIsuUUID, timestamp.Format("2006-01-02 15:04:05"), cond.Condition, cond.Message)
 		} else {
-			queryBaseStr += tailComma + fmt.Sprintf("(%s, %s, 0, %s, %s)", jiaIsuUUID, timestamp.Format("2006-01-02 15:04:05"), cond.Condition, cond.Message)
+			queryBaseStr += tailComma + fmt.Sprintf("(\"%s\", \"%s\", 0, \"%s\", \"%s\")", jiaIsuUUID, timestamp.Format("2006-01-02 15:04:05"), cond.Condition, cond.Message)
 		}
 	}
 
