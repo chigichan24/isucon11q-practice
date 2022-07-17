@@ -1188,9 +1188,7 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
 
-	queryBaseStr := "INSERT INTO `isu_condition`" +
-		"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)" +
-		"	VALUES "
+	queryBaseStr := "INSERT INTO `isu_condition` (`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES "
 	isFirstCompose := true
 	for _, cond := range req {
 		timestamp := time.Unix(cond.Timestamp, 0)
@@ -1199,15 +1197,20 @@ func postIsuCondition(c echo.Context) error {
 			return c.String(http.StatusBadRequest, "bad request body")
 		}
 
+		var tailComma = ""
 		if isFirstCompose {
-			queryBaseStr += fmt.Sprintf("(%s, %s, %d, %s, %s)", jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message) + ","
+			tailComma = ","
 			isFirstCompose = false
 		} else {
-			queryBaseStr += fmt.Sprintf("(%s, %s, %d, %s, %s)", jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
+			tailComma = ""
+		}
+
+		if cond.IsSitting {
+			queryBaseStr += fmt.Sprintf("(%s, %s, 1, %s, %s)", jiaIsuUUID, timestamp.Format("2021-06-04 18:59:09"), cond.Condition, cond.Message) + tailComma
+		} else {
+			queryBaseStr += fmt.Sprintf("(%s, %s, 0, %s, %s)", jiaIsuUUID, timestamp.Format("2021-06-04 18:59:09"), cond.Condition, cond.Message) + tailComma
 		}
 	}
-
-	c.Logger().Debug(queryBaseStr)
 
 	_, err = tx.Exec(queryBaseStr)
 	if err != nil {
