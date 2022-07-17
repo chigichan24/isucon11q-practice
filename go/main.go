@@ -1206,6 +1206,9 @@ func postIsuCondition(c echo.Context) error {
 			queryBaseStr += fmt.Sprintf("(%s, %s, %d, %s, %s)", jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
 		}
 	}
+
+	c.Logger().Debug(queryBaseStr)
+
 	_, err = tx.Exec(queryBaseStr)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
