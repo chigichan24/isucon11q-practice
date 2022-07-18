@@ -88,9 +88,9 @@ type IsuCondition struct {
 	Condition    string    `db:"condition"`
 	Message      string    `db:"message"`
 	CreatedAt    time.Time `db:"created_at"`
-	isDirty      bool      `db:"is_dirty"`
-	isOverweight bool      `db:"is_overweight"`
-	isBroken     bool      `db:"is_broken"`
+	IsDirty      bool      `db:"is_dirty"`
+	IsOverweight bool      `db:"is_overweight"`
+	IsBroken     bool      `db:"is_broken"`
 }
 
 type MySQLConnectionEnv struct {
