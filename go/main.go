@@ -968,9 +968,9 @@ func getIsuConditions(c echo.Context) error {
 	if conditionLevelCSV == "" {
 		return c.String(http.StatusBadRequest, "missing: condition_level")
 	}
-	conditionLevel := map[string]interface{}{}
+	conditionLevel := map[string]bool{}
 	for _, level := range strings.Split(conditionLevelCSV, ",") {
-		conditionLevel[level] = struct{}{}
+		conditionLevel[level] = true
 	}
 
 	startTimeStr := c.QueryParam("start_time")
@@ -1006,26 +1006,38 @@ func getIsuConditions(c echo.Context) error {
 }
 
 // ISUのコンディションをDBから取得
-func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, conditionLevel map[string]interface{}, startTime time.Time,
+func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, conditionLevel map[string]bool, startTime time.Time,
 	limit int, isuName string) ([]*GetIsuConditionResponse, error) {
 
 	conditions := []IsuCondition{}
 	var err error
 
+	queryComposeForLevelFilter := ""
+
+	if conditionLevel[conditionLevelInfo] {
+		queryComposeForLevelFilter += "AND level = 0"
+	}
+	if conditionLevel[conditionLevelCritical] {
+		queryComposeForLevelFilter += "AND level = 3"
+	}
+	if conditionLevel[conditionLevelWarning] {
+		queryComposeForLevelFilter += "AND level = 1 AND level = 2"
+	}
+
 	if startTime.IsZero() {
 		err = db.Select(&conditions,
 			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
-				"	AND `timestamp` < ?"+
-				"	ORDER BY -`timestamp`",
-			jiaIsuUUID, endTime,
+				"	AND `timestamp` < ? "+queryComposeForLevelFilter+
+				"	ORDER BY -`timestamp` LIMIT ?",
+			jiaIsuUUID, endTime, limit,
 		)
 	} else {
 		err = db.Select(&conditions,
 			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
 				"	AND `timestamp` < ?"+
-				"	AND ? <= `timestamp`"+
-				"	ORDER BY -`timestamp`",
-			jiaIsuUUID, endTime, startTime,
+				"	AND ? <= `timestamp`"+queryComposeForLevelFilter+
+				"	ORDER BY -`timestamp` LIMIT ?",
+			jiaIsuUUID, endTime, startTime, limit,
 		)
 	}
 	if err != nil {
@@ -1051,10 +1063,6 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 			}
 			conditionsResponse = append(conditionsResponse, &data)
 		}
-	}
-
-	if len(conditionsResponse) > limit {
-		conditionsResponse = conditionsResponse[:limit]
 	}
 
 	return conditionsResponse, nil
