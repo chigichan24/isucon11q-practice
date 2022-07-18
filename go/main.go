@@ -255,11 +255,11 @@ func main() {
 	db.SetMaxOpenConns(10)
 	defer db.Close()
 
-	//postIsuConditionTargetBaseURL = os.Getenv("POST_ISUCONDITION_TARGET_BASE_URL")
-	//if postIsuConditionTargetBaseURL == "" {
-	//	e.Logger.Fatalf("missing: POST_ISUCONDITION_TARGET_BASE_URL")
-	//	return
-	//}
+	postIsuConditionTargetBaseURL = os.Getenv("POST_ISUCONDITION_TARGET_BASE_URL")
+	if postIsuConditionTargetBaseURL == "" {
+		e.Logger.Fatalf("missing: POST_ISUCONDITION_TARGET_BASE_URL")
+		return
+	}
 
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
 	e.Logger.Fatal(e.Start(serverPort))
