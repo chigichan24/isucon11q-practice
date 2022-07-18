@@ -216,7 +216,7 @@ var chunkedReq []PostIsuConditionRequest
 func main() {
 	e := echo.New()
 	e.Debug = false
-	//e.Logger.SetLevel(log.DEBUG)
+	e.Logger.SetLevel(log.OFF)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
