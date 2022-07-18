@@ -91,6 +91,7 @@ type IsuCondition struct {
 	IsDirty      bool      `db:"is_dirty"`
 	IsOverweight bool      `db:"is_overweight"`
 	IsBroken     bool      `db:"is_broken"`
+	Level        int       `db:"level"`
 }
 
 type MySQLConnectionEnv struct {
@@ -483,7 +484,7 @@ func getIsuList(c echo.Context) error {
 		foundLastCondition := true
 		err = tx.Get(
 			&lastCondition,
-			"SELECT `id`, `jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`, `created_at`, `is_dirty`, `is_overweight`, `is_broken` FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY -`timestamp` LIMIT 1",
+			"SELECT `id`, `jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`, `created_at`, `is_dirty`, `is_overweight`, `is_broken`, `level` FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY -`timestamp` LIMIT 1",
 			isu.JIAIsuUUID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
@@ -496,7 +497,7 @@ func getIsuList(c echo.Context) error {
 
 		var formattedCondition *GetIsuConditionResponse
 		if foundLastCondition {
-			conditionLevel, err := calculateConditionLevel(lastCondition.Condition)
+			conditionLevel, err := calculateConditionLevelFromLevel(lastCondition.Level)
 			if err != nil {
 				c.Logger().Error(err)
 				return c.NoContent(http.StatusInternalServerError)
@@ -1039,7 +1040,7 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 
 	conditionsResponse := []*GetIsuConditionResponse{}
 	for _, c := range conditions {
-		cLevel, err := calculateConditionLevel(c.Condition)
+		cLevel, err := calculateConditionLevelFromLevel(c.Level)
 		if err != nil {
 			continue
 		}
@@ -1066,11 +1067,9 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 }
 
 // ISUのコンディションの文字列からコンディションレベルを計算
-func calculateConditionLevel(condition string) (string, error) {
+func calculateConditionLevelFromLevel(level int) (string, error) {
 	var conditionLevel string
-
-	warnCount := strings.Count(condition, "=true")
-	switch warnCount {
+	switch level {
 	case 0:
 		conditionLevel = conditionLevelInfo
 	case 1, 2:
@@ -1080,7 +1079,6 @@ func calculateConditionLevel(condition string) (string, error) {
 	default:
 		return "", fmt.Errorf("unexpected warn count")
 	}
-
 	return conditionLevel, nil
 }
 
@@ -1123,7 +1121,7 @@ func getTrend(c echo.Context) error {
 
 			if len(conditions) > 0 {
 				isuLastCondition := conditions[0]
-				conditionLevel, err := calculateConditionLevel(isuLastCondition.Condition)
+				conditionLevel, err := calculateConditionLevelFromLevel(isuLastCondition.Level)
 				if err != nil {
 					c.Logger().Error(err)
 					return c.NoContent(http.StatusInternalServerError)
