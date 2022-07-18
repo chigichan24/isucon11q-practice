@@ -481,7 +481,9 @@ func getIsuList(c echo.Context) error {
 	for _, isu := range isuList {
 		var lastCondition IsuCondition
 		foundLastCondition := true
-		err = tx.Get(&lastCondition, "SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY -`timestamp` LIMIT 1",
+		err = tx.Get(
+			&lastCondition,
+			"SELECT id, jia_isu_uuid, timestamp, is_sitting, condition, message, created_at, is_dirty, is_overweight, is_broken FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY -`timestamp` LIMIT 1",
 			isu.JIAIsuUUID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
