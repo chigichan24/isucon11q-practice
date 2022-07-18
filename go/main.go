@@ -1012,17 +1012,31 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 	conditions := []IsuCondition{}
 	var err error
 
-	queryComposeForLevelFilter := ""
+	queryComposeForLevelFilter := "AND `level` in ("
+	isInsertOneMoreCondition := false
 
 	if conditionLevel[conditionLevelInfo] {
-		queryComposeForLevelFilter += " AND `level` = 0"
+		queryComposeForLevelFilter += "0"
+		isInsertOneMoreCondition = true
 	}
 	if conditionLevel[conditionLevelCritical] {
-		queryComposeForLevelFilter += " AND `level` = 3"
+		if isInsertOneMoreCondition {
+			queryComposeForLevelFilter += ", 3"
+		} else {
+			queryComposeForLevelFilter += "3"
+			isInsertOneMoreCondition = true
+		}
 	}
 	if conditionLevel[conditionLevelWarning] {
-		queryComposeForLevelFilter += " AND `level` = 1 AND `level` = 2"
+		if isInsertOneMoreCondition {
+			queryComposeForLevelFilter += ", 1, 2"
+		} else {
+			queryComposeForLevelFilter += "1, 2"
+			isInsertOneMoreCondition = true
+		}
 	}
+
+	queryComposeForLevelFilter += ")"
 
 	if startTime.IsZero() {
 		err = db.Select(&conditions,
