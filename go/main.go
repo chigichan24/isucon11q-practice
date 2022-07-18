@@ -255,11 +255,11 @@ func main() {
 	db.SetMaxOpenConns(10)
 	defer db.Close()
 
-	postIsuConditionTargetBaseURL = os.Getenv("POST_ISUCONDITION_TARGET_BASE_URL")
-	if postIsuConditionTargetBaseURL == "" {
-		e.Logger.Fatalf("missing: POST_ISUCONDITION_TARGET_BASE_URL")
-		return
-	}
+	//postIsuConditionTargetBaseURL = os.Getenv("POST_ISUCONDITION_TARGET_BASE_URL")
+	//if postIsuConditionTargetBaseURL == "" {
+	//	e.Logger.Fatalf("missing: POST_ISUCONDITION_TARGET_BASE_URL")
+	//	return
+	//}
 
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
 	e.Logger.Fatal(e.Start(serverPort))
@@ -483,7 +483,7 @@ func getIsuList(c echo.Context) error {
 		foundLastCondition := true
 		err = tx.Get(
 			&lastCondition,
-			"SELECT id, jia_isu_uuid, timestamp, is_sitting, condition, message, created_at, is_dirty, is_overweight, is_broken FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY -`timestamp` LIMIT 1",
+			"SELECT `id`, `jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`, `created_at`, `is_dirty`, `is_overweight`, `is_broken` FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY -`timestamp` LIMIT 1",
 			isu.JIAIsuUUID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
