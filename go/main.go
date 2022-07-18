@@ -1012,16 +1012,16 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 	conditions := []IsuCondition{}
 	var err error
 
-	queryComposeForLevelFilter := " "
+	queryComposeForLevelFilter := ""
 
 	if conditionLevel[conditionLevelInfo] {
-		queryComposeForLevelFilter += "AND `level` = 0"
+		queryComposeForLevelFilter += " AND `level` = 0"
 	}
 	if conditionLevel[conditionLevelCritical] {
-		queryComposeForLevelFilter += "AND `level` = 3"
+		queryComposeForLevelFilter += " AND `level` = 3"
 	}
 	if conditionLevel[conditionLevelWarning] {
-		queryComposeForLevelFilter += "AND `level` = 1 AND `level` = 2"
+		queryComposeForLevelFilter += " AND `level` = 1 AND `level` = 2"
 	}
 
 	if startTime.IsZero() {
